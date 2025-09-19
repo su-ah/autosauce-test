@@ -1,5 +1,7 @@
 ## How to build?
 
+### Step 0: Download CMake
+
 ### Step 1: Download and set up vcpkg
 
 Download vcpkg anywhere on your computer (not in our repo):

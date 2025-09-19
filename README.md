@@ -2,6 +2,18 @@
 
 ### Step 0: Download CMake
 
+This can be done using 
+Mac command
+```
+brew install cmake
+```
+
+Windows go to that link and follow the steps
+
+https://cmake.org/download/
+
+download the source distribution and then use the default install settings.
+
 ### Step 1: Download and set up vcpkg
 
 Download vcpkg anywhere on your computer (not in our repo):
@@ -20,6 +32,8 @@ but you might possibly run into issues with VS Code CMake extension not recogniz
 
 ### Step 2: Clone the repo
 
+git clone https://github.com/P0k3rf4ce/SauceEngine.git
+
 ### Step 3: Set up a CMakeUserPresets.json file
 
 In the root directory of the repo, create a file names `CMakeUserPresets.json`.
@@ -29,6 +43,7 @@ This file should have the following content:
     "version": 2,
     "configurePresets": [{
         "name": "default",
+        "generator": "Ninja",
         "inherits": "vcpkg",
         "environment": {
             "VCPKG_ROOT": "<ENTER PATH TO VCPKG HERE>"
@@ -39,6 +54,41 @@ This file should have the following content:
 where you must replace the path to vcpkg obviously.
 The existing `CMakePresets.json` file uses the environment setup by `CMakeUserPresets.json`.
 
+
+Note that you might need to change up the generator that you use, this is what Nimish did which worked for him. The generator was changed from Ninja for him to Unix makefiles 
+
+CMakePresets file 
+```
+{
+  "version": 2,
+  "configurePresets": [
+    {
+      "name": "vcpkg",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    }
+  ]
+}
+
+```
+
+CMakeUserPresets file
+```
+{
+    "version": 2,
+    "configurePresets": [{
+        "name": "default",
+        "generator": "Unix Makefiles",
+        "inherits": "vcpkg",
+        "environment": {
+            "VCPKG_ROOT": "<PATH TO vcpkg>"
+        }
+    }]
+}
+
+```
 ### Step 4: Configure, Build, and Run!
 
 I highly recommend using the VS Code CMake extension to do this.

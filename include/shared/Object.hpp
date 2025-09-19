@@ -3,6 +3,10 @@
 
 #include <string>
 
+#ifdef __linux__
+    #include <memory>
+#endif
+
 #include "animation/AnimationProperties.hpp"
 #include "modeling/ModelProperties.hpp"
 #include "rendering/RenderProperties.hpp"

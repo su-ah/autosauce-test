@@ -1,0 +1,26 @@
+# CMakeLists.txt (top of file, BEFORE project())
+cmake_minimum_required(VERSION 3.20)
+
+project(SauceEngine)
+
+add_executable(SauceEngine src/main.cpp)
+
+target_include_directories(SauceEngine PRIVATE
+  ${PROJECT_SOURCE_DIR}/include
+)
+
+find_package(glad CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE glad::glad)
+
+find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+
+find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
+target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/animation)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/modeling)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/rendering)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE sharedLib animationLib modelingLib renderingLib)

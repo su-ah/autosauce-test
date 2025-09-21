@@ -2,6 +2,14 @@
 
 using namespace animation;
 
+// Private methods
+
+void AnimationProperties::computeCenreOfMassAndVolume(const std::vector<Eigen::Vector3d> &vertices, const std::vector<unsigned int> &indices) {
+    // TODO
+}
+
+// Public methods
+
 AnimationProperties::AnimationProperties(const modeling::ModelProperties &modelProps) {
 
 }
@@ -37,5 +45,5 @@ void AnimationProperties::update(double timestep) {
  * A model matrix places the object in the correct point in world space
 */
 Eigen::Affine3d getModelMatrix() {
-
+    return Eigen::Affine3d::Identity();
 }

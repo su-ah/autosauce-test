@@ -15,6 +15,16 @@ namespace animation {
  * Stores all animation related properties of an object
 */
 class AnimationProperties {
+private:
+    Eigen::Vector3d com;
+    double volume;
+
+    /**
+     * Computes the center of mass and volume for the given vertices and indices
+     * and stores them in the class members
+     */
+    void computeCenreOfMassAndVolume(const std::vector<Eigen::Vector3d> &vertices, const std::vector<unsigned int> &indices);
+
 public:
     AnimationProperties(const modeling::ModelProperties &modelProps);
     ~AnimationProperties();

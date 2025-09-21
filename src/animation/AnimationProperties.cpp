@@ -5,7 +5,19 @@ using namespace animation;
 // Private methods
 
 void AnimationProperties::computeCenreOfMassAndVolume(const std::vector<Eigen::Vector3d> &vertices, const std::vector<unsigned int> &indices) {
-    // TODO
+    auto comX24Xvolume = Eigen::Vector3d(0,0,0);
+    double volumeX6 = 0;
+    for(auto indices_iter = indices.begin(); indices_iter != indices.end(); indices_iter += 3) {
+        Eigen::Matrix3d A;
+        A.col(0) = vertices[indices_iter[0]];
+        A.col(1) = vertices[indices_iter[1]];
+        A.col(2) = vertices[indices_iter[2]];
+        double curVolumeX6 = A.determinant();
+        comX24Xvolume += curVolumeX6 * (A.col(0) + A.col(1) + A.col(2));
+        volumeX6 += curVolumeX6;
+    }
+    this->com = comX24Xvolume / (4.0 * volumeX6);
+    this->volume = std::abs(volumeX6 / 6.0);
 }
 
 // Public methods

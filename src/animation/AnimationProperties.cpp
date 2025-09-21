@@ -21,7 +21,7 @@ void AnimationProperties::computeCenreOfMassAndVolume(
         comX24Xvolume += curVolumeX6 * (A.col(0) + A.col(1) + A.col(2));
         volumeX6 += curVolumeX6;
     }
-    com = comX24Xvolume / (4.0 * volumeX6);
+    com = comX24Xvolume / (volumeX6 ? 4.0 * volumeX6 : 1.0);
     volume = std::abs(volumeX6 / 6.0);
 }
 

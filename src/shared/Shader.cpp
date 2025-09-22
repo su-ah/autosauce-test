@@ -53,7 +53,7 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Error: " << type << " shader compilation failed: " << infoLog << std::endl;
+            //LOG_ERROR("%s shader compilation failed: %s", type.c_str(), infoLog);
         }
     } else {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);

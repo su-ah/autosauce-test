@@ -7,6 +7,7 @@
 #include <functional>
 
 #include "glad/glad.h"
+#include <GLFW/glfw3.h>
 #include "shared/Logger.hpp"
 
 enum SHADER_TYPE {
@@ -69,6 +70,14 @@ Shader() {
 
 ~Shader(){
   LOG_DEBUG("Shader object destroyed");
+  
+  // Check if OpenGL context is still valid before making OpenGL calls
+  // This prevents segfaults during shutdown
+  if (glfwGetCurrentContext() == nullptr) {
+    // OpenGL context is already destroyed, skip cleanup
+    return;
+  }
+  
   if (bound) {    
     LOG_WARN("Shader is still bound during destruction. Forcing unbind.");
     unbind();

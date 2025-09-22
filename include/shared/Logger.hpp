@@ -43,6 +43,7 @@ private:
 
 public:
     static Logger& getInstance();
+    static Logger* getInstanceSafe(); // Returns nullptr if destroyed
     
     // Delete copy constructor and assignment operator
     Logger(const Logger&) = delete;
@@ -121,15 +122,16 @@ private:
     }
 };
 
-#define LOG_DEBUG(msg) Logger::getInstance().debug(msg)
-#define LOG_INFO(msg) Logger::getInstance().info(msg)
-#define LOG_WARN(msg) Logger::getInstance().warn(msg)
-#define LOG_ERROR(msg) Logger::getInstance().error(msg)
+// Convenience macros for global logging with null safety
+#define LOG_DEBUG(msg) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->debug(msg); } while(0)
+#define LOG_INFO(msg) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->info(msg); } while(0)
+#define LOG_WARN(msg) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->warn(msg); } while(0)
+#define LOG_ERROR(msg) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->error(msg); } while(0)
 
-// Formatted logging macros
-#define LOG_DEBUG_F(format, ...) Logger::getInstance().debug(format, __VA_ARGS__)
-#define LOG_INFO_F(format, ...) Logger::getInstance().info(format, __VA_ARGS__)
-#define LOG_WARN_F(format, ...) Logger::getInstance().warn(format, __VA_ARGS__)
-#define LOG_ERROR_F(format, ...) Logger::getInstance().error(format, __VA_ARGS__)
+// Formatted logging macros with null safety
+#define LOG_DEBUG_F(format, ...) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->debug(format, __VA_ARGS__); } while(0)
+#define LOG_INFO_F(format, ...) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->info(format, __VA_ARGS__); } while(0)
+#define LOG_WARN_F(format, ...) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->warn(format, __VA_ARGS__); } while(0)
+#define LOG_ERROR_F(format, ...) do { auto* logger = Logger::getInstanceSafe(); if (logger) logger->error(format, __VA_ARGS__); } while(0)
 
 #endif // LOGGER_HPP

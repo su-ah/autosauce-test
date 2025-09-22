@@ -4,7 +4,7 @@
 #include <sstream>
 #include <algorithm>
 
-// Helper method to convert SHADER_TYPE to OpenGL enum
+// Converts our SHADER TYPE to GL name
 GLenum Shader::getGLShaderType(SHADER_TYPE type) {
     switch (type) {
         case VERTEX: return GL_VERTEX_SHADER;
@@ -17,6 +17,10 @@ GLenum Shader::getGLShaderType(SHADER_TYPE type) {
     }
 }
 
+/*
+    Compiles a shader of the given type from the provided source shader.
+    Will do full error checking for you.
+*/
 bool Shader::compileShader(GLuint& shader, SHADER_TYPE shaderType, const std::string& source) {
     GLenum glType = getGLShaderType(shaderType);
     if (glType == 0) return false;
@@ -40,6 +44,7 @@ bool Shader::compileShader(GLuint& shader, SHADER_TYPE shaderType, const std::st
     return true;
 }
 
+// Helper method for linking shaders but I guess you could use this standalone if you wanted
 void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
     GLint success;
     GLchar infoLog[1024];
@@ -59,6 +64,8 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
     }
 }
 
+// Attach new type of shader to this program
+// See SHADER_TYPE in /include/shared/Shader.hpp
 bool Shader::addShader(SHADER_TYPE shaderType, const std::string& source) {
     // Check if this shader type already exists
     if (shaderMap.find(shaderType) != shaderMap.end()) {
@@ -76,6 +83,9 @@ bool Shader::addShader(SHADER_TYPE shaderType, const std::string& source) {
     return false;
 }
 
+/*
+    If you want to on the fly replace a shader src you can do it here.
+*/
 bool Shader::replaceShader(SHADER_TYPE shaderType, const std::string& source) {
     // Remove existing shader of this type if it exists
     removeShader(shaderType);
@@ -95,6 +105,9 @@ bool Shader::replaceShader(SHADER_TYPE shaderType, const std::string& source) {
     return false;
 }
 
+/*
+    De-attaches given shader type from its program.
+*/
 bool Shader::removeShader(SHADER_TYPE shaderType) {
     auto it = shaderMap.find(shaderType);
     if (it != shaderMap.end()) {
@@ -124,6 +137,10 @@ bool Shader::removeShader(SHADER_TYPE shaderType) {
     return false;
 }
 
+/*
+    Links your attached input shaders into a program - this is usually done automatically after adding sources but you can
+    also do it manually.
+*/
 bool Shader::linkProgram() {
     if (shaders.empty()) {
         std::cout << "Error: No shaders to link" << std::endl;
@@ -155,6 +172,16 @@ bool Shader::linkProgram() {
     return true;
 }
 
+/*
+ * Load shaders from files.
+ * Will compile and link if all successfully compiled.
+ * Bool return denotes compile and link success.
+ * 
+ * Example:
+ * std::unordered_map<SHADER_TYPE, std::string> shaderFiles = {
+ *        {VERTEX, "../assets/default.vert"},
+ * };
+ */
 bool Shader::loadFromFiles(const std::unordered_map<SHADER_TYPE, std::string>& shaderFiles) {
     std::unordered_map<SHADER_TYPE, std::string> sources;
     
@@ -173,6 +200,11 @@ bool Shader::loadFromFiles(const std::unordered_map<SHADER_TYPE, std::string>& s
     return loadFromSources(sources);
 }
 
+/**
+ * Load shader from raw string input sources.
+ * Will compile and link if all successfully compiled.
+ * Bool return denotes compile and link success.
+ */
 bool Shader::loadFromSources(const std::unordered_map<SHADER_TYPE, std::string>& shaderSources) {
     // Clear existing shaders
     for (GLuint shader : shaders) {
@@ -195,6 +227,10 @@ bool Shader::loadFromSources(const std::unordered_map<SHADER_TYPE, std::string>&
     return linkProgram();
 }
 
+/*
+    Helper to get ID of uniform by name
+    Returns -1 if not found.
+*/
 GLint Shader::getUniformLocation(const std::string& name) {
     auto it = uniformCache.find(name);
     if (it != uniformCache.end()) {
@@ -211,6 +247,17 @@ GLint Shader::getUniformLocation(const std::string& name) {
     return location;
 }
 
+/*
+    When we set uniforms it applies to the active program.
+
+    This will do essentially a quick swap out to set the uniform then switch
+    back to the originally active shader.
+
+    If we render on a separate thread this could cause issues.
+
+    If this is too slow we can in the future just trust that the programmer
+    knows what they're doing. ( ͡° ͜ʖ ͡°)
+*/
 void Shader::ensureShaderActive(std::function<void()> uniformSetter) {
     if (shaderProgram == 0) {
         LOG_WARN("Cannot set uniform - no shader program created");
@@ -236,6 +283,7 @@ void Shader::ensureShaderActive(std::function<void()> uniformSetter) {
     }
 }
 
+/* Sets float uniform */
 void Shader::setUniform(const std::string& name, float value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
@@ -245,6 +293,7 @@ void Shader::setUniform(const std::string& name, float value) {
     }
 }
 
+/* Sets int uniform */
 void Shader::setUniform(const std::string& name, int value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
@@ -254,6 +303,7 @@ void Shader::setUniform(const std::string& name, int value) {
     }
 }
 
+/* Set bool uniform */
 void Shader::setUniform(const std::string& name, bool value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
@@ -263,6 +313,7 @@ void Shader::setUniform(const std::string& name, bool value) {
     }
 }
 
+/* Vec3f uniform */
 void Shader::setUniform(const std::string& name, float x, float y, float z) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
@@ -272,6 +323,7 @@ void Shader::setUniform(const std::string& name, float x, float y, float z) {
     }
 }
 
+/* Vec4f uniform */
 void Shader::setUniform(const std::string& name, float x, float y, float z, float w) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
@@ -281,18 +333,22 @@ void Shader::setUniform(const std::string& name, float x, float y, float z, floa
     }
 }
 
+/*
+ * Actually use the shader
+ * Must be called before you render!
+ */
 void Shader::bind() {
     if (shaderProgram == 0) {
-        std::cout << "Error: Cannot bind shader - no program created" << std::endl;
+        LOG_ERROR("Error: Cannot bind shader - no program created");
         return;
     }
     
     if (!bound) {
         glUseProgram(shaderProgram);
         bound = true;
-        LOG_INFO("Shader bound and activated successfully");
+        LOG_DEBUG("Shader bound and activated successfully");
     } else {
-        LOG_WARN("Shader is already bound");
+        LOG_WARN_F("Shader %d is already unbound", shaderProgram);
     }
 }
 
@@ -300,8 +356,8 @@ void Shader::unbind() {
     if (bound) {
         glUseProgram(0);
         bound = false;
-        LOG_INFO("Shader unbound successfully");
+        LOG_DEBUG("Shader unbound successfully");
     } else {
-        LOG_WARN("Shader is already unbound");
+        LOG_WARN_F("Shader %d is already unbound", shaderProgram);
     }
 }

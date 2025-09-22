@@ -9,9 +9,14 @@ Logger::Logger() : currentLogLevel(LogLevel::INFO), colorEnabled(true) {
 
 Logger& Logger::getInstance() {
     if (instance == nullptr) {
+        std::cout << "Logger instance created" << std::endl;
         instance = new Logger();
     }
     return *instance;
+}
+
+Logger* Logger::getInstanceSafe() {
+    return instance; // Returns nullptr if destroyed
 }
 
 void Logger::setLogLevel(LogLevel level) {

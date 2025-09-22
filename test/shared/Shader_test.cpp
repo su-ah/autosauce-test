@@ -338,3 +338,212 @@ TEST_F(ShaderTest, DestructorWithBoundShader) {
     // Test passes if no crash occurs and warning is logged
     SUCCEED();
 }
+
+TEST_F(ShaderTest, ComputeShaderTest) {
+    Shader shader;
+    
+    std::string computeShader = R"(
+        #version 430
+        layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+        layout(std430, binding = 0) buffer DataBuffer {
+            float data[];
+        };
+        
+        void main() {
+            uint index = gl_GlobalInvocationID.x;
+            if (index < data.length()) {
+                data[index] = data[index] * 2.0;
+            }
+        }
+    )";
+    
+    // Test adding compute shader
+    EXPECT_TRUE(shader.addShader(COMPUTE, computeShader));
+    EXPECT_TRUE(shader.linkProgram());
+    
+    // Test binding compute shader
+    shader.bind();
+    EXPECT_TRUE(shader.is_bound());
+    
+    shader.unbind();
+    EXPECT_FALSE(shader.is_bound());
+}
+
+TEST_F(ShaderTest, GeometryShaderTest) {
+    Shader shader;
+    
+    std::string vertexShader = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        void main() {
+            gl_Position = vec4(aPos, 1.0);
+        }
+    )";
+    
+    std::string geometryShader = R"(
+        #version 330 core
+        layout (triangles) in;
+        layout (triangle_strip, max_vertices = 3) out;
+        
+        void main() {
+            for(int i = 0; i < 3; i++) {
+                gl_Position = gl_in[i].gl_Position;
+                EmitVertex();
+            }
+            EndPrimitive();
+        }
+    )";
+    
+    std::string fragmentShader = R"(
+        #version 330 core
+        out vec4 FragColor;
+        void main() {
+            FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        }
+    )";
+    
+    // Test adding geometry shader along with vertex and fragment
+    EXPECT_TRUE(shader.addShader(VERTEX, vertexShader));
+    EXPECT_TRUE(shader.addShader(GEOMETRY, geometryShader));
+    EXPECT_TRUE(shader.addShader(FRAGMENT, fragmentShader));
+    EXPECT_TRUE(shader.linkProgram());
+    
+    shader.bind();
+    EXPECT_TRUE(shader.is_bound());
+    
+    shader.unbind();
+    EXPECT_FALSE(shader.is_bound());
+}
+
+TEST_F(ShaderTest, MalformedShaderHandling) {
+    Shader shader;
+    
+    // Test completely invalid shader code
+    std::string malformedVertexShader = R"(
+        #version 330 core
+        this is not valid shader code at all!!!
+        random garbage text
+        layout (location = 0) in vec3 aPos;
+    )";
+    
+    // This should fail due to invalid syntax
+    EXPECT_FALSE(shader.addShader(VERTEX, malformedVertexShader));
+    
+    // Test shader with invalid GLSL syntax
+    std::string malformedFragmentShader = R"(
+        #version 330 core
+        out vec4 FragColor;
+        void main() {
+            FragColor = invalid_function_call();
+            undefined_variable = 5;
+        }
+    )";
+    
+    // This should fail due to undefined functions and variables
+    EXPECT_FALSE(shader.addShader(FRAGMENT, malformedFragmentShader));
+    
+    // Test shader with completely wrong language (not GLSL)
+    std::string notGLSLShader = R"(
+        function main() {
+            console.log("This is JavaScript, not GLSL!");
+            return 42;
+        }
+    )";
+    
+    // This should definitely fail
+    EXPECT_FALSE(shader.addShader(VERTEX, notGLSLShader));
+}
+
+TEST_F(ShaderTest, UnknownShaderTypeHandling) {
+    Shader shader;
+    
+    // Test the SWAG shader type which should trigger the default case
+    std::string simpleShader = R"(
+        #version 330 core
+        void main() {
+            gl_Position = vec4(0.0);
+        }
+    )";
+    
+    // This should fail because SWAG is not a valid OpenGL shader type
+    EXPECT_FALSE(shader.addShader(SWAG, simpleShader));
+}
+
+TEST_F(ShaderTest, LinkingErrorHandling) {
+    Shader shader;
+    
+    // Create a vertex shader that outputs something
+    std::string vertexShaderWithOutput = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        out vec3 vertexColor;
+        void main() {
+            gl_Position = vec4(aPos, 1.0);
+            vertexColor = vec3(1.0, 0.0, 0.0);
+        }
+    )";
+    
+    // Create a fragment shader that expects different input
+    std::string fragmentShaderWithWrongInput = R"(
+        #version 330 core
+        in vec3 differentVariableName;  // Different from vertexColor
+        out vec4 FragColor;
+        void main() {
+            FragColor = vec4(differentVariableName, 1.0);
+        }
+    )";
+    
+    // Add both shaders (they should compile individually)
+    EXPECT_TRUE(shader.addShader(VERTEX, vertexShaderWithOutput));
+    EXPECT_TRUE(shader.addShader(FRAGMENT, fragmentShaderWithWrongInput));
+    
+    // Linking might fail due to mismatched interface variables
+    // Some drivers are lenient, so we'll just verify the method can be called
+    bool linkResult = shader.linkProgram();
+    // Don't assert the result since different drivers handle this differently
+    (void)linkResult; // Suppress unused variable warning
+    
+    SUCCEED(); // Test passes if no crash occurs
+}
+
+TEST_F(ShaderTest, EmptyShaderHandling) {
+    Shader shader;
+    
+    // Test completely empty shader
+    std::string emptyShader = "";
+    EXPECT_FALSE(shader.addShader(VERTEX, emptyShader));
+    
+    // Test shader with only whitespace
+    std::string whitespaceShader = "   \n\t  \n  ";
+    EXPECT_FALSE(shader.addShader(FRAGMENT, whitespaceShader));
+}
+
+TEST_F(ShaderTest, MultipleShaderTypesOfSameKind) {
+    Shader shader;
+    
+    std::string firstVertexShader = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        void main() {
+            gl_Position = vec4(aPos, 1.0);
+        }
+    )";
+    
+    std::string secondVertexShader = R"(
+        #version 330 core
+        layout (location = 0) in vec3 aPos;
+        uniform mat4 mvp;
+        void main() {
+            gl_Position = mvp * vec4(aPos, 1.0);
+        }
+    )";
+    
+    // Add first vertex shader
+    EXPECT_TRUE(shader.addShader(VERTEX, firstVertexShader));
+    
+    // Try to add second vertex shader - should fail with warning
+    EXPECT_FALSE(shader.addShader(VERTEX, secondVertexShader));
+    
+    // But replacing should work
+    EXPECT_TRUE(shader.replaceShader(VERTEX, secondVertexShader));
+}

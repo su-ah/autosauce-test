@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 #include "glad/glad.h"
 #include "shared/Logger.hpp"
@@ -30,6 +31,7 @@ std::unordered_map<std::string, GLint> uniformCache; // Cache uniform locations
 GLenum getGLShaderType(SHADER_TYPE type);
 bool compileShader(GLuint& shader, SHADER_TYPE shaderType, const std::string& source);
 void checkCompileErrors(GLuint shader, const std::string& type);
+void ensureShaderActive(std::function<void()> uniformSetter);
 
 
 public:

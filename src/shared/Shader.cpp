@@ -211,38 +211,73 @@ GLint Shader::getUniformLocation(const std::string& name) {
     return location;
 }
 
+void Shader::ensureShaderActive(std::function<void()> uniformSetter) {
+    if (shaderProgram == 0) {
+        LOG_WARN("Cannot set uniform - no shader program created");
+        return;
+    }
+    
+    // Store current shader program
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    
+    // Temporarily use this shader if it's not active
+    bool needsRestore = (currentProgram != static_cast<GLint>(shaderProgram));
+    if (needsRestore) {
+        glUseProgram(shaderProgram);
+    }
+    
+    // Execute the uniform setter
+    uniformSetter();
+    
+    // Restore previous shader program
+    if (needsRestore) {
+        glUseProgram(currentProgram);
+    }
+}
+
 void Shader::setUniform(const std::string& name, float value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
-        glUniform1f(location, value);
+        ensureShaderActive([&]() {
+            glUniform1f(location, value);
+        });
     }
 }
 
 void Shader::setUniform(const std::string& name, int value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
-        glUniform1i(location, value);
+        ensureShaderActive([&]() {
+            glUniform1i(location, value);
+        });
     }
 }
 
 void Shader::setUniform(const std::string& name, bool value) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
-        glUniform1i(location, value ? 1 : 0);
+        ensureShaderActive([&]() {
+            glUniform1i(location, value ? 1 : 0);
+        });
     }
 }
 
 void Shader::setUniform(const std::string& name, float x, float y, float z) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
-        glUniform3f(location, x, y, z);
+        ensureShaderActive([&]() {
+            glUniform3f(location, x, y, z);
+        });
     }
 }
 
 void Shader::setUniform(const std::string& name, float x, float y, float z, float w) {
     GLint location = getUniformLocation(name);
     if (location != -1) {
-        glUniform4f(location, x, y, z, w);
+        ensureShaderActive([&]() {
+            glUniform4f(location, x, y, z, w);
+        });
     }
 }
 

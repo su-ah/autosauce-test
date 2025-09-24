@@ -11,9 +11,6 @@ GLenum Shader::getGLShaderType(SHADER_TYPE type) {
         case FRAGMENT: return GL_FRAGMENT_SHADER;
         case GEOMETRY: return GL_GEOMETRY_SHADER;
         case COMPUTE: return GL_COMPUTE_SHADER;
-        default: 
-            LOG_ERROR("Unknown shader type");
-            return 0;
     }
 }
 
@@ -53,13 +50,13 @@ void Shader::checkCompileErrors(GLuint shader, const std::string& type) {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            //LOG_ERROR("%s shader compilation failed: %s", type.c_str(), infoLog);
+            LOG_ERROR_F("%s shader compilation failed: %s", type.c_str(), infoLog);
         }
     } else {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Error: Program linking failed: " << infoLog << std::endl;
+            LOG_ERROR_F("Program linking failed: %s", infoLog);
         }
     }
 }
@@ -95,8 +92,7 @@ bool Shader::replaceShader(SHADER_TYPE shaderType, const std::string& source) {
     if (compileShader(shader, shaderType, source)) {
         shaders.push_back(shader);
         shaderMap[shaderType] = shader;
-        std::cout << "Shader type " << shaderType << " replaced successfully" << std::endl;
-        
+        LOG_DEBUG_F("Shader type %d replaced successfully", shaderType);
         // Clear uniform cache since the program will need to be relinked
         uniformCache.clear();
         
@@ -125,15 +121,15 @@ bool Shader::removeShader(SHADER_TYPE shaderType) {
         // Remove from map
         shaderMap.erase(it);
         
-        std::cout << "Shader type " << shaderType << " removed successfully" << std::endl;
-        
+        LOG_DEBUG_F("Shader type %d removed successfully", shaderType);
+
         // Clear uniform cache since the program will need to be relinked
         uniformCache.clear();
         
         return true;
     }
-    
-    std::cout << "Warning: Shader type " << shaderType << " not found" << std::endl;
+
+    LOG_WARN_F("Shader type %d not found", shaderType);
     return false;
 }
 
@@ -143,7 +139,7 @@ bool Shader::removeShader(SHADER_TYPE shaderType) {
 */
 bool Shader::linkProgram() {
     if (shaders.empty()) {
-        std::cout << "Error: No shaders to link" << std::endl;
+        LOG_ERROR("No shaders to link");
         return false;
     }
     
@@ -188,7 +184,7 @@ bool Shader::loadFromFiles(const std::unordered_map<SHADER_TYPE, std::string>& s
     for (const auto& pair : shaderFiles) {
         std::ifstream file(pair.second);
         if (!file.is_open()) {
-            std::cout << "Error: Failed to open shader file: " << pair.second << std::endl;
+            LOG_ERROR_F("Failed to open shader file: %s", pair.second.c_str());
             return false;
         }
         
@@ -241,7 +237,7 @@ GLint Shader::getUniformLocation(const std::string& name) {
     uniformCache[name] = location;
     
     if (location == -1) {
-        std::cout << "Warning: Uniform '" << name << "' not found" << std::endl;
+        LOG_WARN_F("Uniform '%s' not found for shader program %d", name.c_str(), shaderProgram);
     }
     
     return location;
@@ -356,7 +352,7 @@ void Shader::unbind() {
     if (bound) {
         glUseProgram(0);
         bound = false;
-        LOG_DEBUG("Shader unbound successfully");
+        LOG_DEBUG_F("Shader %d unbound successfully", shaderProgram);
     } else {
         LOG_WARN_F("Shader %d is already unbound", shaderProgram);
     }

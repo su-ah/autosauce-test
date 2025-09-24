@@ -15,13 +15,11 @@ enum SHADER_TYPE {
   FRAGMENT,
   VERTEX,
   GEOMETRY,
-  COMPUTE,
-  SWAG
+  COMPUTE
 };
 
 class Shader {
 private:
-SHADER_TYPE type = UNINITIALIZED;
 bool bound = false;
 GLuint shaderProgram = 0;
 std::vector<GLuint> shaders; // Store multiple shader objects
@@ -36,10 +34,6 @@ void ensureShaderActive(std::function<void()> uniformSetter);
 
 
 public:
-
-inline SHADER_TYPE get_type() {
-	return type;
-}
 
 inline bool is_bound() {
 	return bound;
@@ -77,9 +71,9 @@ Shader() {
     // OpenGL context is already destroyed, skip cleanup
     return;
   }
-  
-  if (bound) {    
-    LOG_WARN("Shader is still bound during destruction. Forcing unbind.");
+
+  if (bound) {
+    LOG_WARN_F("Shader %d is still bound during destruction. Forcing unbind.", shaderProgram);
     unbind();
   }
   

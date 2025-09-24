@@ -62,7 +62,6 @@ protected:
 TEST_F(ShaderTest, ShaderCreation) {
     // Test basic shader creation and getters
     Shader shader;
-    EXPECT_EQ(shader.get_type(), UNINITIALIZED);
     EXPECT_FALSE(shader.is_bound());
 }
 
@@ -72,19 +71,13 @@ TEST_F(ShaderTest, ShaderTypeEnum) {
     EXPECT_NE(VERTEX, UNINITIALIZED);
     EXPECT_NE(GEOMETRY, UNINITIALIZED);
     EXPECT_NE(COMPUTE, UNINITIALIZED);
-    EXPECT_NE(SWAG, UNINITIALIZED);
     
     // Test that each enum has a unique value
     EXPECT_NE(FRAGMENT, VERTEX);
     EXPECT_NE(FRAGMENT, GEOMETRY);
     EXPECT_NE(FRAGMENT, COMPUTE);
-    EXPECT_NE(FRAGMENT, SWAG);
     EXPECT_NE(VERTEX, GEOMETRY);
     EXPECT_NE(VERTEX, COMPUTE);
-    EXPECT_NE(VERTEX, SWAG);
-    EXPECT_NE(GEOMETRY, COMPUTE);
-    EXPECT_NE(GEOMETRY, SWAG);
-    EXPECT_NE(COMPUTE, SWAG);
 }
 
 TEST_F(ShaderTest, ShaderSources) {
@@ -188,7 +181,6 @@ TEST_F(ShaderTest, UniformSetters) {
     shader.setUniform("testVec4", 1.0f, 2.0f, 3.0f, 4.0f);
     
     // Test that shader is properly initialized
-    EXPECT_EQ(shader.get_type(), UNINITIALIZED); // This doesn't change after linking
     EXPECT_FALSE(shader.is_bound()); // Should not be bound by default
 }
 
@@ -452,21 +444,6 @@ TEST_F(ShaderTest, MalformedShaderHandling) {
     
     // This should definitely fail
     EXPECT_FALSE(shader.addShader(VERTEX, notGLSLShader));
-}
-
-TEST_F(ShaderTest, UnknownShaderTypeHandling) {
-    Shader shader;
-    
-    // Test the SWAG shader type which should trigger the default case
-    std::string simpleShader = R"(
-        #version 330 core
-        void main() {
-            gl_Position = vec4(0.0);
-        }
-    )";
-    
-    // This should fail because SWAG is not a valid OpenGL shader type
-    EXPECT_FALSE(shader.addShader(SWAG, simpleShader));
 }
 
 TEST_F(ShaderTest, LinkingErrorHandling) {

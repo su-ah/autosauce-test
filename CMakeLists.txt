@@ -36,11 +36,5 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE sharedLib animationLib modelingLib renderingLib)
 
-# Enable testing
-enable_testing()
-
-# Find GTest
-find_package(GTest CONFIG REQUIRED)
-
-# Add test subdirectory
+# Add test subdirectory. Everything for tests is loaded there
 add_subdirectory(test)

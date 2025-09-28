@@ -7,6 +7,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(SauceEngine)
 
+# Add coverage flags for Apple builds
+if(APPLE)
+    add_compile_options(-g -fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate -g)
+endif()
+
 if(WIN32)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)

@@ -12,6 +12,7 @@ GLenum Shader::getGLShaderType(SHADER_TYPE type) {
         case GEOMETRY: return GL_GEOMETRY_SHADER;
         case COMPUTE: return GL_COMPUTE_SHADER;
     }
+    return -1; // Invalid type
 }
 
 /*

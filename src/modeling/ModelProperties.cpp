@@ -1,12 +1,15 @@
 #include "modeling/ModelProperties.hpp"
+#include "modeling/Model.hpp"
 
 using namespace modeling;
 
-ModelProperties::ModelProperties(std::string gltfFilename) {
-
+ModelProperties::ModelProperties(std::string gltfFilename) 
+    : gltfFilename(gltfFilename), model(nullptr) {
+    // Initialize with null model and empty properties map
 }
 ModelProperties::~ModelProperties() {
-
+    // Shared pointer will automatically clean up Model
+    // Properties map will clean up automatically
 }
 
 /**
@@ -31,5 +34,13 @@ void ModelProperties::unload() {
  * for the shader program
 */
 void ModelProperties::update(const animation::AnimationProperties &animProps) {
-    
+    // TODO: Implement model buffer setup and animation property integration
+}
+
+bool ModelProperties::hasProperty(const std::string& tag) const {
+    return properties.find(tag) != properties.end();
+}
+
+void ModelProperties::removeProperty(const std::string& tag) {
+    properties.erase(tag);
 }

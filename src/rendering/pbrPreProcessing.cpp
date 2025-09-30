@@ -331,8 +331,8 @@ genEnvCubemap(const std::string hdrEnvMap) {
     static bool initialized = false;
     if (!initialized) {
         equirectToCubemap.loadFromFiles({
-            {SHADER_TYPE::VERTEX, "shaders/pbr/cubemap.vs"},
-            {SHADER_TYPE::FRAGMENT, "shaders/pbr/equirect_to_cube.fs"}
+            {SHADER_TYPE::VERTEX, "shaders/pbr/cubemap.vert"},
+            {SHADER_TYPE::FRAGMENT, "shaders/pbr/equirect_to_cube.frag"}
         });
 
         initialized = true;
@@ -458,8 +458,8 @@ genPrefilterMap(const GLuint envCubemap)
     static bool initialized = false;
     if (!initialized)
     {
-        prefilterShader.loadFromFiles({{SHADER_TYPE::VERTEX, "shaders/pbr/cubemap.vs"},
-                                       {SHADER_TYPE::FRAGMENT, "shaders/pbr/prefilter.fs"}});
+        prefilterShader.loadFromFiles({{SHADER_TYPE::VERTEX, "shaders/pbr/cubemap.vert"},
+                                       {SHADER_TYPE::FRAGMENT, "shaders/pbr/prefilter.frag"}});
         initialized = true;
     }
 

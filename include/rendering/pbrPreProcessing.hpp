@@ -1,6 +1,7 @@
 #ifndef PBR_PREPROCESSING_HPP
 #define PBR_PREPROCESSING_HPP
 
+#include <glad/glad.h>
 #include <Eigen/Geometry>
 #include <string>
 
@@ -11,39 +12,34 @@ typedef unsigned int uint;
 
 namespace rendering {
 
-/**
- * contains some helper functions for pre-processing environment maps for PBR
- *    as well as pbr shader initialization
- */
-
 
 /**
  * given an HDR environment map, generate a cubemap
- * 
- * returns the OpenGL ID of the cubemap
+ * @param hdrEnvMap path to the HDR environment map
+ * @return the OpenGL ID of the cubemap texture
  */
-uint genEnvCubemap(const std::string hdrEnvMap);
+GLuint genEnvCubemap(const std::string hdrEnvMap);
 
 /**
  * given an environment cubemap, generate an irradiance map
- * 
- * returns the OpenGL ID of the irradiance map
+ * @param envCubemap the OpenGL ID of the environment cubemap texture
+ * @return the OpenGL ID of the irradiance cubemap texture
  */
-uint genIrradianceMap(const uint& envCubemap, const uint& captureFBO, const uint& captureRBO, const std::array<Eigen::Affine3d, 6>& captureViews, const Eigen::Affine3d& captureProj);
+GLuint genIrradianceMap(const GLuint& envCubemap);
 
  /**
   * given an environment cubemap, generate a pre-filtered environment map
-  * 
-  * returns the OpenGL ID of the pre-filtered environment map
+  * @param envCubemap the OpenGL ID of the environment cubemap texture
+  * @return the OpenGL ID of the pre-filtered cubemap texture
   */
-uint genPrefilterMap(const uint& envCubemap, const std::string hdrEnvMap, const uint& captureFBO, const uint& captureRBO, const std::array<Eigen::Affine3d, 6>& captureViews, const Eigen::Affine3d& captureProj);
+GLuint genPrefilterMap(const GLuint& envCubemap);
 
 /**
  * given an environment cubemap, generate a BRDF lookup texture
- * 
- * returns the OpenGL ID of the BRDF LUT
+ * @param envCubemap the OpenGL ID of the environment cubemap texture
+ * @return the OpenGL ID of the BRDF lookup texture
  */
-uint genBRDFLUT(const uint& envCubemap, const uint& captureFBO, const uint& captureRBO, const std::array<Eigen::Affine3d, 6>& captureViews, const Eigen::Affine3d& captureProj);
+GLuint genBRDFLUT(const GLuint& envCubemap);
 
 
 }

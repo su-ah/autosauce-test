@@ -6,6 +6,7 @@
 
 #define PI 3.14159265358979323846f
 
+
 typedef unsigned int uint;
 
 namespace rendering {
@@ -35,7 +36,7 @@ uint genIrradianceMap(const uint& envCubemap, const uint& captureFBO, const uint
   * 
   * returns the OpenGL ID of the pre-filtered environment map
   */
-uint genPrefilterMap(const uint& envCubemap, const uint& captureFBO, const uint& captureRBO, const std::array<Eigen::Affine3d, 6>& captureViews, const Eigen::Affine3d& captureProj);
+uint genPrefilterMap(const uint& envCubemap, const std::string hdrEnvMap, const uint& captureFBO, const uint& captureRBO, const std::array<Eigen::Affine3d, 6>& captureViews, const Eigen::Affine3d& captureProj);
 
 /**
  * given an environment cubemap, generate a BRDF lookup texture

@@ -2,7 +2,7 @@
 #define MODEL_HPP
 
 #include "modeling/Mesh.hpp"
-#include "modeling/material.hpp"
+#include "modeling/Material.hpp"
 #include <vector>
 #include <memory>
 

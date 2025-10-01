@@ -42,20 +42,15 @@ struct Material {
     // name of the material
     const std::string name;
 
-    // aiTextureType_BASE_COLOR
     const Texture &base_color;
 
-    // aiTextureType_NORMAL_CAMERA
-    const Texture &normal_camera;
+    const Texture &normal;
 
-    // aiTextureType_EMISSION_COLOR
-    const Texture &emission_color;
+    const Texture &albedo;
 
-    // aiTextureType_METALNESS
-    const Texture &metalness;
+    const Texture &metallic;
 
-    // aiTextureType_DIFFUSE_ROUGHNESS
-    const Texture &diffuse_roughness;
+    const Texture &roughness;
 
     // aiTextureType_AMBIENT_OCCLUSION
     const Texture &ambient_occlusion;
@@ -64,18 +59,18 @@ struct Material {
     Material(
         std::string name,
         Texture &base_color,
-        Texture &normal_camera,
-        Texture &emission_color,
+        Texture &normal,
+        Texture &albedo,
         Texture &metalness,
         Texture &diffuse_roughness,
         Texture &ambient_occlusion
     ):
         name(std::move(name)),
         base_color(base_color),
-        normal_camera(normal_camera),
-        emission_color(emission_color),
-        metalness(metalness),
-        diffuse_roughness(diffuse_roughness),
+        normal(normal),
+        albedo(albedo),
+        metallic(metallic),
+        roughness(roughness),
         ambient_occlusion(ambient_occlusion)
     {};
     ~Material() = default;

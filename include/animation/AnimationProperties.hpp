@@ -31,6 +31,7 @@ public:
         double &volume
     );
 
+    AnimationProperties();
     AnimationProperties(const modeling::ModelProperties &modelProps);
     ~AnimationProperties();
 
@@ -57,6 +58,16 @@ public:
      * A model matrix places the object in the correct point in world space
     */
     Eigen::Affine3d getModelMatrix();
+
+    Eigen::Matrix3d computeInertiaTensor(
+        const std::vector<Eigen::Vector3d> &vertices,
+        const std::vector<unsigned int> &indices,
+        const Eigen::Vector3d &com) const;
+    /**
+     * Compute inverse inertia tensor (direct inversion)
+     */
+    static Eigen::Matrix3d computeInverseInertiaTensor(
+        const Eigen::Matrix3d &inertia);
 };
 
 }

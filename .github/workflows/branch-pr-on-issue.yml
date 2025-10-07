@@ -23,17 +23,10 @@ jobs:
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
 
-    - name: Get issue labels
-      id: get_labels
-      run: |
-        ISSUE_LABELS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels" \
-          | jq -r '.[].name')
-        echo "ISSUE_LABELS=$ISSUE_LABELS" >> $GITHUB_ENV
-
     - name: Determine team from labels
       id: determine_team
       run: |
+        ISSUE_LABELS=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name')
         TEAM_LABELS=("animation" "rendering" "modeling")
         SELECTED_TEAM=""
         for TEAM in "${TEAM_LABELS[@]}"; do
@@ -56,3 +49,18 @@ jobs:
         git fetch origin "$BASE_BRANCH"
         git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH"
         git push origin "$BRANCH_NAME"
+    
+    - name: Create draft pr
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ISSUE_NUMBER=${{ github.event.issue.number }}
+        BASE_BRANCH="${{ env.SELECTED_TEAM }}-team-dev"
+        BRANCH_NAME="${{ env.SELECTED_TEAM }}-#${ISSUE_NUMBER}"
+        gh pr create \
+          --base "$BASE_BRANCH" \
+          --head "$BRANCH_NAME" \
+          --title "Implement #${ISSUE_NUMBER}" \
+          --body "Resolves #${ISSUE_NUMBER}. This PR is auto-generated." \
+          --label "${{ env.SELECTED_TEAM }}" \
+          --draft

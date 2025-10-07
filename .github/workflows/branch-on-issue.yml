@@ -1,0 +1,56 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Create branch for new issues
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  issues:
+    types: [opened]
+    
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# thanks chatgpt for writing this for me
+jobs:
+  create_branch:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
+    - name: Get issue labels
+      id: get_labels
+      run: |
+        ISSUE_LABELS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels" \
+          | jq -r '.[].name')
+        echo "ISSUE_LABELS=$ISSUE_LABELS" >> $GITHUB_ENV
+
+    - name: Determine team from labels
+      id: determine_team
+      run: |
+        TEAM_LABELS=("animation" "rendering" "modeling")
+        SELECTED_TEAM=""
+        for TEAM in "${TEAM_LABELS[@]}"; do
+          if [[ "$ISSUE_LABELS" == *"$TEAM"* && "$ISSUE_LABELS" != *"nobranch"* ]]; then
+            SELECTED_TEAM=$TEAM
+            break
+          fi
+        done
+        if [ -z "$SELECTED_TEAM" ]; then
+          echo "No valid team found or 'nobranch' label is present."
+          exit 1
+        fi
+        echo "SELECTED_TEAM=$SELECTED_TEAM" >> $GITHUB_ENV
+
+    - name: Create branch
+      run: |
+        ISSUE_NUMBER=${{ github.event.issue.number }}
+        BRANCH_NAME="${{ env.SELECTED_TEAM }}-#${ISSUE_NUMBER}"
+        git checkout -b "$BRANCH_NAME"
+        git push origin "$BRANCH_NAME"

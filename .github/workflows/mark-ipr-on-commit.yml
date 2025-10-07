@@ -23,8 +23,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        PR_BODY=$(gh pr view ${{ github.event.pull_request.number }} --json body --jq '.body')
-        ISSUE_NUMBER=$(echo "$PR_BODY" | grep -oE '#[0-9]+' | head -n1 | tr -d '#')
+        ISSUE_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json closingIssuesReferences --jq '.closingIssuesReferences[0].id')
 
     # yo copilot going crazy rn
     - name: Get project item and status

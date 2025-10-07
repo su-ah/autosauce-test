@@ -1,15 +1,11 @@
-# This is a basic workflow to help you get started with Actions
 
 name: Create branch for new issues
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   issues:
     types: [opened]
     
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-# thanks chatgpt for writing this for me
+# thanks copilot for writing this for me
 jobs:
   create_branch:
     runs-on: ubuntu-latest
@@ -57,10 +53,20 @@ jobs:
         ISSUE_NUMBER=${{ github.event.issue.number }}
         BASE_BRANCH="${{ env.SELECTED_TEAM }}-team-dev"
         BRANCH_NAME="${{ env.SELECTED_TEAM }}-#${ISSUE_NUMBER}"
-        gh pr create \
+        PR_URL=$(gh pr create \
           --base "$BASE_BRANCH" \
           --head "$BRANCH_NAME" \
           --title "Implement #${ISSUE_NUMBER}" \
           --body "Resolves #${ISSUE_NUMBER}. This PR is auto-generated." \
           --label "${{ env.SELECTED_TEAM }}" \
-          --draft
+          --draft \
+          --json url --jq '.url')
+        echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+    
+    - name: Reference PR in issue
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        ISSUE_NUMBER=${{ github.event.issue.number }}
+        PR_URL="${{ env.PR_URL }}"
+        gh issue comment $ISSUE_NUMBER --body "Generated PR: $PR_URL"

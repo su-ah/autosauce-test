@@ -51,6 +51,8 @@ jobs:
     - name: Create branch
       run: |
         ISSUE_NUMBER=${{ github.event.issue.number }}
+        BASE_BRANCH="${{ env.SELECTED_TEAM }}-team-dev"
         BRANCH_NAME="${{ env.SELECTED_TEAM }}-#${ISSUE_NUMBER}"
-        git checkout -b "$BRANCH_NAME"
+        git fetch origin "$BASE_BRANCH"
+        git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH"
         git push origin "$BRANCH_NAME"

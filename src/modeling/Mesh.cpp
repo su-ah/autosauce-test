@@ -69,3 +69,7 @@ bool Mesh::validate() {
 
 	return true;
 }
+
+void Mesh::bind() const {
+	glBindVertexArray(VAO);
+}

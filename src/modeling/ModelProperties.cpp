@@ -34,7 +34,17 @@ void ModelProperties::unload() {
  * for the shader program
 */
 void ModelProperties::update(const animation::AnimationProperties &animProps) {
-    // TODO: Implement model buffer setup and animation property integration
+    if (model) {
+        // Setup the model for rendering (bind shader and vertex data)
+        model->setupForRendering();
+        
+        auto shader = model->getShader();
+
+        // Set any modeling-specific uniforms
+        if (shader && shader->is_bound()) {
+
+        }
+    }
 }
 
 bool ModelProperties::hasProperty(const std::string& tag) const {

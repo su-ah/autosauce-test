@@ -13,7 +13,7 @@ namespace animation {
 }
 
 namespace modeling {
-    class Model; // Forward declaration
+    class Model;
 
     // Type alias for the variant that can hold different property types
     using PropertyValue = std::variant<int, bool, float, double, std::string>;
@@ -41,7 +41,7 @@ namespace modeling {
 
         /**
          * Do the various buffer setups to prepare the model
-         * for the shader program
+         * for the shader program and bind vertex data
         */
         void update(const animation::AnimationProperties &animProps);
 

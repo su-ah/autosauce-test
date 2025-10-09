@@ -5,10 +5,13 @@
 #include <vector>
 
 #include "shared/Object.hpp"
+#include "modeling/Camera.hpp"
 
 class Scene {
 private:
     std::vector<Object> objects;
+    std::shared_ptr<Camera> active_camera = nullptr;
+
 public:
     Scene();
     Scene(std::string &filename);
@@ -17,6 +20,9 @@ public:
     void load();
     void unload();
     void update(double timestep);
+
+    std::shared_ptr<Camera> get_camera();
+    void set_camera(std::shared_ptr<Camera> cam);
 };
 
 #endif

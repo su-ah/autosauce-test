@@ -55,11 +55,11 @@ namespace modeling {
         
         std::vector<std::shared_ptr<Model>> models;
         
-        // Load all materials first (Team Member 2's responsibility)
+        // Load all materials first
         std::vector<std::shared_ptr<Material>> materials = loadMaterials(scene);
         LOG_INFO_F("Loaded %d materials", static_cast<int>(materials.size()));
         
-        // Load GLTF extensions (Team Member 3's responsibility)
+        // Load GLTF extensions
         std::unordered_map<std::string, std::string> gltfExtensions = loadGLTFExtensions(scene);
         LOG_INFO_F("Loaded %d GLTF extensions", static_cast<int>(gltfExtensions.size()));
         
@@ -68,7 +68,7 @@ namespace modeling {
             processNode(scene->mRootNode, scene, models, materials, shader);
         }
         
-        // Apply GLTF extensions to all models (Team Member 3's responsibility)
+        // Apply GLTF extensions to all models
         for (auto& model : models) {
             applyGLTFExtensions(model, gltfExtensions);
         }
@@ -87,7 +87,7 @@ namespace modeling {
         LOG_DEBUG_F("Processing node: %s (meshes: %d, children: %d)", 
                     node->mName.C_Str(), node->mNumMeshes, node->mNumChildren);
         
-        // Process GLTF node-specific data (Team Member 3's responsibility)
+        // Process GLTF node-specific data
         std::unordered_map<std::string, std::string> nodeExtensions;
         processGLTFNode(node, scene, nodeExtensions);
         
@@ -96,7 +96,7 @@ namespace modeling {
             unsigned int meshIndex = node->mMeshes[i];
             aiMesh* assimpMesh = scene->mMeshes[meshIndex];
             
-            // Load mesh data (Team Member 1's responsibility)
+            // Load mesh data 
             std::shared_ptr<Mesh> mesh = loadMeshFromNode(assimpMesh, scene);
             
             if (mesh) {
@@ -254,7 +254,6 @@ namespace modeling {
     }
 
     std::shared_ptr<Material> ModelLoader::processMaterial(aiMaterial* aiMat, const aiScene* scene) {
-        // TODO: Team Member 2 - Implement material processing
         LOG_DEBUG("TODO: Implement processMaterial");
         
         /*

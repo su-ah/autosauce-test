@@ -247,7 +247,14 @@ namespace modeling {
 				v.Normal.z=mesh->mNormals[i].z;
 			}
 			else {
-				// TODO generate normals
+				/*
+				 * we use the assimp flag aiProcess_GenSmoothNormals,
+				 * so assimp should always generate normals for us.
+				 * Therefore we should consider it an error if
+				 * a mesh gets to this point with no normals.
+				 */
+				LOG_ERROR("Mesh loader: mesh has no normal vectors, did assimp fail to generate them?");
+				return false;
 			}
 
 			/* fetch UV coords, or default to (0,0) */
@@ -261,7 +268,7 @@ namespace modeling {
 			}
 
 			vertices.push_back(v);
-			LOG_DEBUG_F("vertex %u: <%f,%f,%f>, UV=(%f, %f), normal <%f,%f,%f>",i,
+			LOG_DEBUG_F("vertex {}: <{},{},{}>, UV=({}, {}), normal <{},{},{}>",i,
 					v.Position.x,v.Position.y,v.Position.z,
 					v.TexCoords.x,v.TexCoords.y,
 					v.Normal.x,v.Normal.y,v.Normal.z
@@ -275,19 +282,21 @@ namespace modeling {
 
 			/* skip points/lines, only load triangles */
 			if (f.mNumIndices!=3) {
-				LOG_INFO_F("Mesh loader: faces[%u] is not a triangle, skipping",i);
+				LOG_INFO_F("Mesh loader: faces[{}] is not a triangle, skipping",i);
 				continue;
 			}
 
 			/* flatten indices of all faces to 1d vector of indices */
-			LOG_DEBUG_F("face %u: ",i);
+			LOG_DEBUG_F("face {}: ",i);
 			for (unsigned int j=0; j<f.mNumIndices; j++) {
 				idc=f.mIndices[j];
+				/* check for indices out of bounds - we cannot use vertex 4 of a triangle */
 				if (idc>=nvertices) {
-					LOG_ERROR_F("Mesh loader: indices[%u] of faces[%u]=%u, but there are only %u vertices",j,i,idc,nvertices);
+					LOG_ERROR_F("Mesh loader: indices[{}] of faces[{}]={}, but there are only {} vertices",j,i,idc,nvertices);
+					return false;
 				}
 				indices.push_back(idc);
-				LOG_DEBUG_F("%u, ",idc);
+				LOG_DEBUG_F("{}, ",idc);
 			}
 		}
 

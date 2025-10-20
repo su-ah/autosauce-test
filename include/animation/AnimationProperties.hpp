@@ -2,6 +2,9 @@
 #define ANIMATION_PROPERTIES_HPP
 
 #include <Eigen/Geometry>
+#include <vector>
+#include <memory>  
+#include <limits>  
 
 #include "modeling/ModelProperties.hpp"
 
@@ -18,6 +21,7 @@ class AnimationProperties {
 private:
     Eigen::Vector3d com;
     double volume;
+    std::vector<Eigen::AlignedBox3d> boundingBoxes;
 
 public:
     /**
@@ -68,6 +72,18 @@ public:
      */
     static Eigen::Matrix3d computeInverseInertiaTensor(
         const Eigen::Matrix3d &inertia);
+
+
+    /**
+     * Returns true if two bounding boxes overlap.
+     */
+    bool boxesOverlap(const Eigen::AlignedBox3d &a, const Eigen::AlignedBox3d &b) const;
+
+    void computeBoundingBoxHierarchy(
+        const std::vector<Eigen::Vector3d> &vertices,
+        const std::vector<unsigned int> &indices
+    );
+
 };
 
 }

@@ -80,8 +80,7 @@ Eigen::Matrix3d AnimationProperties::computeInertiaTensor(
 
 Eigen::Matrix3d AnimationProperties::computeInverseInertiaTensor(
     const Eigen::Matrix3d &inertia)
-{
-    return inertia.inverse();
+{    return inertia.inverse();
 }
 
 
@@ -117,4 +116,27 @@ void AnimationProperties::update(double timestep) {
 */
 Eigen::Affine3d AnimationProperties::getModelMatrix() {
     return Eigen::Affine3d::Identity();
+}
+
+void AnimationProperties::computeBoundingBoxHierarchy(
+    const std::vector<Eigen::Vector3d> &vertices,
+    const std::vector<unsigned int> &indices
+) {
+    boundingBoxes.clear();
+
+    for (size_t i = 0; i < indices.size(); i += 3) {
+        Eigen::AlignedBox3d box;
+        box.setEmpty();
+        box.extend(vertices[indices[i]]);
+        box.extend(vertices[indices[i + 1]]);
+        box.extend(vertices[indices[i + 2]]);
+        boundingBoxes.push_back(box);
+    }
+}
+
+bool AnimationProperties::boxesOverlap(
+    const Eigen::AlignedBox3d &a,
+    const Eigen::AlignedBox3d &b
+) const {
+    return a.intersects(b);
 }

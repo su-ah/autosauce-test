@@ -39,7 +39,9 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src/animation)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/modeling)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/rendering)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
-
+add_subdirectory(external/osqp)
+add_library(boost_odeint INTERFACE)
+target_include_directories(boost_odeint INTERFACE external/boost-odeint/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE sharedLib animationLib modelingLib renderingLib)
 
 # Add test subdirectory. Everything for tests is loaded there

@@ -2,8 +2,8 @@
 // ODEsolver.hpp - ODE Solver Interface for SauceEngine
 //==============================================================================
 
-#ifndef ODESOLVER_HPP
-#define ODESOLVER_HPP
+#ifndef ANIMATION_ODESOLVER_HPP
+#define ANIMATION_ODESOLVER_HPP
 
 #include <vector>
 #include <functional>
@@ -69,7 +69,7 @@ private:
 };
 
 //==============================================================================
-// RK4Solver - Fourth-order Runge-Kutta method (more accurate!)
+// RK4Solver - Fourth-order Runge-Kutta method (more accurate than Euler)
 //==============================================================================
 
 class RK4Solver : public ODESolver {

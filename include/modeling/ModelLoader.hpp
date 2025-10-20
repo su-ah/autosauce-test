@@ -75,7 +75,7 @@ private:
      * - Handle multiple texture coordinate sets if needed
      * - Validate mesh data before creating Mesh object
      */
-    static std::shared_ptr<Mesh> loadMeshFromNode(aiMesh* mesh, const aiScene* scene);
+    static std::shared_ptr<Mesh> loadMeshFromNode(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Shader> shader);
     
     /**
      * @brief Process and validate mesh data

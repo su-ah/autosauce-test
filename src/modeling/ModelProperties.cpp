@@ -42,7 +42,7 @@ void ModelProperties::update(const animation::AnimationProperties &animProps) {
 
         // Set any modeling-specific uniforms
         if (shader && shader->is_bound()) {
-
+            
         }
     }
 }

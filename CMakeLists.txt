@@ -29,12 +29,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 find_package(Eigen3 CONFIG REQUIRED NO_MODULE)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/animation)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/modeling)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/rendering)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE sharedLib animationLib modelingLib renderingLib)
+target_link_libraries(${PROJECT_NAME} PRIVATE animationLib modelingLib renderingLib sharedLib)
 
 if (BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/test)

@@ -40,8 +40,6 @@ namespace modeling {
         if (!validateScene(scene)) {
             LOG_ERROR_F("Failed to load model from file: %s", filePath.c_str());
             LOG_ERROR_F("Assimp error: %s", importer.GetErrorString());
-			std::cout << "im fucked up boss!" << std::endl;
-			std::cout << importer.GetErrorString() << std::endl;
             return {};
         }
         
@@ -102,7 +100,7 @@ namespace modeling {
             aiMesh* assimpMesh = scene->mMeshes[meshIndex];
             
             // Load mesh data 
-            std::shared_ptr<Mesh> mesh = loadMeshFromNode(assimpMesh, scene);
+            std::shared_ptr<Mesh> mesh = loadMeshFromNode(assimpMesh, scene, shader);
             
             if (mesh) {
                 // Get the material for this mesh
@@ -166,7 +164,7 @@ namespace modeling {
 
     // TODO: Mesh loader 
 
-    std::shared_ptr<Mesh> ModelLoader::loadMeshFromNode(aiMesh* mesh, const aiScene* scene) {
+    std::shared_ptr<Mesh> ModelLoader::loadMeshFromNode(aiMesh* mesh, const aiScene* scene, std::shared_ptr<Shader> shader) {
         LOG_DEBUG_F("Loading mesh: %s", mesh->mName.C_Str());
 
         std::vector<Vertex> vertices;
@@ -180,7 +178,8 @@ namespace modeling {
 
         // Create and return the Mesh object
         try {
-            return std::make_shared<Mesh>(vertices, indices);
+            bool setupGL = (shader != nullptr);
+            return std::make_shared<Mesh>(vertices, indices, setupGL);
         } catch (const std::exception& e) {
             LOG_ERROR_F("Failed to create Mesh object: %s", e.what());
             return nullptr;

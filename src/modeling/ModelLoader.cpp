@@ -164,8 +164,7 @@ namespace modeling {
     // TODO: Mesh loader 
 
     std::shared_ptr<Mesh> ModelLoader::loadMeshFromNode(aiMesh* mesh, const aiScene* scene) {
-        // TODO: Implement mesh loading
-        LOG_DEBUG_F("TODO: Implement loadMeshFromNode for mesh: %s", mesh->mName.C_Str());
+        LOG_DEBUG_F("Loading mesh: %s", mesh->mName.C_Str());
 
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
@@ -208,10 +207,10 @@ namespace modeling {
         *    - Ensure we have at least some vertices
         *
         */
-		Vertex v; /* vertices */
-		unsigned int idc; /* indicies */
-		unsigned int nvertices=mesh->mNumVertices;
-		unsigned int nfaces=mesh->mNumFaces;
+    Vertex v; /* vertices */
+    unsigned int idx; /* indices */
+    unsigned int nvertices = mesh->mNumVertices;
+    unsigned int nfaces = mesh->mNumFaces;
 
 		if (nvertices < 1) {
 			LOG_ERROR("Mesh has no vertices, fail");
@@ -275,8 +274,8 @@ namespace modeling {
 			);
 		}
 
-		/* fetch faces/indices */
-		indices.reserve(nfaces);
+        /* fetch faces/indices */
+        indices.reserve(nfaces * 3);
 		for (unsigned int i=0; i<nfaces; i++) {
 			auto f=mesh->mFaces[i];
 
@@ -286,28 +285,25 @@ namespace modeling {
 				continue;
 			}
 
-			/* flatten indices of all faces to 1d vector of indices */
-			LOG_DEBUG_F("face {}: ",i);
-			for (unsigned int j=0; j<f.mNumIndices; j++) {
-				idc=f.mIndices[j];
+            /* flatten indices of all faces to 1d vector of indices */
+            for (unsigned int j=0; j<f.mNumIndices; j++) {
+                idx = f.mIndices[j];
 				/* check for indices out of bounds - we cannot use vertex 4 of a triangle */
-				if (idc>=nvertices) {
-					LOG_ERROR_F("Mesh loader: indices[{}] of faces[{}]={}, but there are only {} vertices",j,i,idc,nvertices);
+                if (idx>=nvertices) {
+                    LOG_ERROR_F("Mesh loader: indices[{}] of faces[{}]={}, but there are only {} vertices", j, i, idx, nvertices);
 					return false;
 				}
-				indices.push_back(idc);
-				LOG_DEBUG_F("{}, ",idc);
+                indices.push_back(idx);
 			}
 		}
 
-		/*
-		 * if for some reason the model has faces but
-		 * they are all points/lines, fail to load
-		 */
-		if (indices.size()==0) {
-			LOG_ERROR("Mesh loader: mesh did not contain any triangles");
-			return false;
-		}
+        /* if for some reason the model has faces but they are all points/lines, fail to load */
+        if (indices.empty()) {
+            LOG_ERROR("Mesh loader: mesh did not contain any triangles");
+            return false;
+        }
+
+        LOG_DEBUG_F("Mesh loaded: %u vertices, %zu indices", nvertices, indices.size());
 
         return true;
     }

@@ -1,11 +1,11 @@
 #pragma once
 #include "modeling/Material.hpp"
 #include "modeling/Model.hpp"
+#include "modeling/Mesh.hpp"
 #include <assimp/scene.h>
 #include <string>
 #include <optional>
 
-// temporary Key definition
 struct ModelKey{
     int scene;
     int id;
@@ -31,13 +31,10 @@ struct TextureKey{
 
 // loaded GLTF file contents
 struct LoadedContents {
-    // all `Material` and `Textures` 
     MaterialManager materials;
 
-    // all models and meshes
-    std::vector<Model> models;
+    std::vector<modeling::Model> models;
 
-    // https://github.com/P0k3rf4ce/SauceEngine/blob/61b7983fc037b3e6f96ccd42d4905ea60c3d2fe5/src/modeling/ModelLoader.cpp
     std::vector<Mesh> &loaded_meshes;
 
 private:
@@ -71,7 +68,7 @@ private:
 // Manages all assets from all files
 class AssetManager {
     std::vector<SceneObjects> scenes;
-    std::vector<Model> custom_models;
+    std::vector<modeling::Model> custom_models;
 
 public:
     AssetManager() = default;
@@ -81,8 +78,7 @@ public:
     void load_file(std::string GLTF_path);
     void unload_file(std::string GLTF_path);
 
-    // getters for assets
-    const Model& get_model(ModelKey id);
+    const modeling::Model& get_model(ModelKey id);
     const Material& get_material(MaterialKey id);
     const Texture& get_texture(TextureKey id);
     const Mesh& get_mesh(MeshKey id);

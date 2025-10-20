@@ -2,7 +2,6 @@
 #include "stb_image.h"
 
 
-
 void AssetManager::load_file(std::string GLTF_path) {
     for (auto &scene: this->scenes){
         if (scene.path == GLTF_path) {        // file found
@@ -26,7 +25,7 @@ void AssetManager::unload_file(std::string GLTF_path) {
     }
 }
 
-const Model& AssetManager::get_model(ModelKey key) {
+const modeling::Model& AssetManager::get_model(ModelKey key) {
     auto& contents = this->scenes[key.scene].contents;
     if (contents.has_value()) {
         return contents->models[key.id];

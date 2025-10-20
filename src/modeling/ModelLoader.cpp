@@ -230,7 +230,7 @@ namespace modeling {
     namespace {
         Texture& default_texture() {
             static Texture* tex = []{
-                auto p = std::unique_ptr<const uint8_t>(new uint8_t(255));
+                auto p = std::unique_ptr<const uint8_t[]>(new uint8_t[1]{255});
                 return new Texture(std::move(p), 1, 1, 4, 0);
             }();
             return *tex;

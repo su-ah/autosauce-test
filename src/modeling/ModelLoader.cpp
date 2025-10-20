@@ -40,6 +40,8 @@ namespace modeling {
         if (!validateScene(scene)) {
             LOG_ERROR_F("Failed to load model from file: %s", filePath.c_str());
             LOG_ERROR_F("Assimp error: %s", importer.GetErrorString());
+			std::cout << "im fucked up boss!" << std::endl;
+			std::cout << importer.GetErrorString() << std::endl;
             return {};
         }
         
@@ -165,18 +167,17 @@ namespace modeling {
     // TODO: Mesh loader 
 
     std::shared_ptr<Mesh> ModelLoader::loadMeshFromNode(aiMesh* mesh, const aiScene* scene) {
-        // TODO: Implement mesh loading
-        LOG_DEBUG_F("TODO: Implement loadMeshFromNode for mesh: %s", mesh->mName.C_Str());
-        
+        LOG_DEBUG_F("Loading mesh: %s", mesh->mName.C_Str());
+
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        
+
         // Call the mesh processing function
         if (!processMesh(mesh, vertices, indices)) {
             LOG_ERROR_F("Failed to process mesh: %s", mesh->mName.C_Str());
             return nullptr;
         }
-        
+
         // Create and return the Mesh object
         try {
             return std::make_shared<Mesh>(vertices, indices);
@@ -187,43 +188,126 @@ namespace modeling {
     }
 
     bool ModelLoader::processMesh(aiMesh* mesh, std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) {
-        // TODO: Implement mesh processing
-        LOG_DEBUG("TODO: Implement processMesh");
-        
         /*
-        * 
+        *
         * 1. Extract vertices:
         *    - Loop through mesh->mVertices for positions
         *    - Loop through mesh->mNormals for normals (if available)
         *    - Loop through mesh->mTextureCoords[0] for UV coordinates (if available)
         *    - Create Vertex struct for each vertex
-        * 
+        *
         * 2. Extract indices:
         *    - Loop through mesh->mFaces
         *    - Each face should be triangulated (3 indices per face)
         *    - Add indices to the indices vector
-        * 
+        *
         * 3. Handle missing data:
         *    - If normals are missing, you might want to generate them
         *    - If UVs are missing, set to (0,0)
-        * 
+        *
         * 4. Validate data:
         *    - Ensure indices are within bounds
         *    - Ensure we have at least some vertices
-        * 
+        *
         */
-        
-        // Placeholder implementation - replace with actual implementation
-        LOG_WARN("Using placeholder mesh processing - implement proper mesh loading!");
-        
-        // Create a simple triangle as placeholder
-        vertices = {
-            {{0.0f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.5f, 1.0f}},
-            {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-            {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}}
-        };
-        indices = {0, 1, 2};
-        
+    Vertex v; /* vertices */
+    unsigned int idx; /* indices */
+    unsigned int nvertices = mesh->mNumVertices;
+    unsigned int nfaces = mesh->mNumFaces;
+
+		if (nvertices < 1) {
+			LOG_ERROR("Mesh has no vertices, fail");
+			return false;
+		}
+		if (!(mesh->HasFaces())) {
+			/*
+			 * apparently some assimp-valid models can have no
+			 * faces via "special scene flags" but I'm
+			 * assuming this is out of scope
+			 */
+			LOG_ERROR("Mesh has no indices, fail");
+			return false;
+		}
+
+		/* fetch vertex/normal/UV data */
+		vertices.reserve(nvertices); // allocate space early, quick optimization
+		for (unsigned int i=0; i<nvertices; i++) {
+			v.Position.x=mesh->mVertices[i].x;
+			v.Position.y=mesh->mVertices[i].y;
+			v.Position.z=mesh->mVertices[i].z;
+
+			/* fetch normals, or generate */
+			if (mesh->HasNormals()) {
+				/*
+				 * if there are normals, "The array is mNumVertices in size",
+				 * so this is safe without checking the size of mNormals.
+				 * Similar for mTextureCoords
+				 * ref: https://documentation.help/assimp/structai_mesh.html
+				 */
+				v.Normal.x=mesh->mNormals[i].x;
+				v.Normal.y=mesh->mNormals[i].y;
+				v.Normal.z=mesh->mNormals[i].z;
+			}
+			else {
+				/*
+				 * we use the assimp flag aiProcess_GenSmoothNormals,
+				 * so assimp should always generate normals for us.
+				 * Therefore we should consider it an error if
+				 * a mesh gets to this point with no normals.
+				 */
+				LOG_ERROR("Mesh loader: mesh has no normal vectors, did assimp fail to generate them?");
+				return false;
+			}
+
+			/* fetch UV coords, or default to (0,0) */
+			if (mesh->HasTextureCoords(0)) {
+				v.TexCoords.x=mesh->mTextureCoords[0][i].x;
+				v.TexCoords.y=mesh->mTextureCoords[0][i].y;
+			}
+			else {
+				v.TexCoords.x=0;
+				v.TexCoords.y=0;
+			}
+
+			vertices.push_back(v);
+			LOG_DEBUG_F("vertex {}: <{},{},{}>, UV=({}, {}), normal <{},{},{}>",i,
+					v.Position.x,v.Position.y,v.Position.z,
+					v.TexCoords.x,v.TexCoords.y,
+					v.Normal.x,v.Normal.y,v.Normal.z
+			);
+		}
+
+        /* fetch faces/indices */
+        indices.reserve(nfaces * 3);
+		for (unsigned int i=0; i<nfaces; i++) {
+			auto f=mesh->mFaces[i];
+
+			/* skip points/lines, only load triangles */
+			if (f.mNumIndices!=3) {
+				LOG_INFO_F("Mesh loader: faces[{}] is not a triangle, skipping",i);
+				continue;
+			}
+
+            /* flatten indices of all faces to 1d vector of indices */
+            for (unsigned int j=0; j<f.mNumIndices; j++) {
+                idx = f.mIndices[j];
+				/* check for indices out of bounds - we cannot use vertex 4 of a triangle */
+                if (idx>=nvertices) {
+                    LOG_ERROR_F("Mesh loader: indices[{}] of faces[{}]={}, but there are only {} vertices", j, i, idx, nvertices);
+					return false;
+				}
+                indices.push_back(idx);
+			}
+		}
+
+        /* if for some reason the model has faces but they are all points/lines, fail to load */
+        if (indices.empty()) {
+            LOG_ERROR("Mesh loader: mesh did not contain any triangles");
+            return false;
+        }
+
+        LOG_DEBUG_F("Mesh loaded: %u vertices, %zu indices", nvertices, indices.size());
+
         return true;
     }
 

@@ -60,7 +60,7 @@ namespace modeling {
         LOG_INFO_F("Loaded %d materials", static_cast<int>(materials.size()));
         
         // Load GLTF extensions
-        std::unordered_map<std::string, std::string> gltfExtensions = loadGLTFExtensions(scene);
+        std::unordered_map<std::string, PropertyValue> gltfExtensions = loadGLTFExtensions(scene);
         LOG_INFO_F("Loaded %d GLTF extensions", static_cast<int>(gltfExtensions.size()));
         
         // Process the root node recursively
@@ -88,7 +88,7 @@ namespace modeling {
                     node->mName.C_Str(), node->mNumMeshes, node->mNumChildren);
         
         // Process GLTF node-specific data
-        std::unordered_map<std::string, std::string> nodeExtensions;
+        std::unordered_map<std::string, PropertyValue> nodeExtensions;
         processGLTFNode(node, scene, nodeExtensions);
         
         // Process all meshes in this node
@@ -291,36 +291,54 @@ namespace modeling {
         return nullptr;
     }
 
-    // todo: Tag Extraction
-    std::unordered_map<std::string, std::string> ModelLoader::loadGLTFExtensions(const aiScene* scene) {
-
-        LOG_DEBUG("TODO: Implement loadGLTFExtensions");
+    std::unordered_map<std::string, PropertyValue> ModelLoader::loadGLTFExtensions(const aiScene* scene) {
+        LOG_DEBUG("Loading GLTF extensions from scene");
         
-        /*
-        * 
-        * 1. Check if this is a GLTF file:
-        *    - Look at scene metadata
-        *    - Check for GLTF-specific properties
-        * 
-        * 2. Parse GLTF extensions from scene metadata:
-        *    - Extensions are usually stored in scene->mMetaData
-        *    - Look for keys that start with "gltf." or similar
-        * 
-        * 3. Handle common GLTF extensions:
-        *    - KHR_materials_pbrSpecularGlossiness
-        *    - KHR_materials_unlit
-        *    - KHR_draco_mesh_compression
-        *    - Custom extensions specific to your use case
-        * 
-        * 4. Parse JSON data if extensions contain complex data
-
-    
-        */
+        std::unordered_map<std::string, PropertyValue> extensions;
         
-        std::unordered_map<std::string, std::string> extensions;
+        if (!scene->mMetaData) {
+            LOG_DEBUG("No metadata found in scene");
+            return extensions;
+        }
         
-        // Placeholder implementation - replace with actual implementation
-        LOG_WARN("Using placeholder GLTF extension loading - implement proper GLTF extension parsing!");
+        for (unsigned int i = 0; i < scene->mMetaData->mNumProperties; i++) {
+            const aiString& key = scene->mMetaData->mKeys[i];
+            const aiMetadataEntry& entry = scene->mMetaData->mValues[i];
+            
+            std::string keyStr = key.C_Str();
+            
+            if (keyStr.find("gltf") != std::string::npos || 
+                keyStr.find("KHR_") != std::string::npos ||
+                keyStr.find("EXT_") != std::string::npos) {
+                
+                PropertyValue value;
+                switch (entry.mType) {
+                    case AI_BOOL:
+                        value = *static_cast<bool*>(entry.mData);
+                        break;
+                    case AI_INT32:
+                        value = *static_cast<int32_t*>(entry.mData);
+                        break;
+                    case AI_UINT64:
+                        value = static_cast<int>(*static_cast<uint64_t*>(entry.mData));
+                        break;
+                    case AI_FLOAT:
+                        value = *static_cast<float*>(entry.mData);
+                        break;
+                    case AI_DOUBLE:
+                        value = *static_cast<double*>(entry.mData);
+                        break;
+                    case AI_AISTRING:
+                        value = std::string(static_cast<aiString*>(entry.mData)->C_Str());
+                        break;
+                    default:
+                        LOG_WARN_F("Unknown metadata type for key: %s", keyStr.c_str());
+                        continue;
+                }
+                
+                extensions[keyStr] = value;
+            }
+        }
         
         return extensions;
     }
@@ -328,63 +346,94 @@ namespace modeling {
     void ModelLoader::processGLTFNode(
         aiNode* node, 
         const aiScene* scene, 
-        std::unordered_map<std::string, std::string>& extensions
+        std::unordered_map<std::string, PropertyValue>& extensions
     ) {
-        LOG_DEBUG_F("TODO: Implement processGLTFNode for node: %s", node->mName.C_Str());
+        LOG_DEBUG_F("Processing GLTF node: %s", node->mName.C_Str());
         
-        /*
-        * 
-        * 1. Check node metadata for GLTF-specific properties:
-        *    - Custom properties
-        *    - LOD information
-        *    - Animation data
-        * 
-        * 2. Parse node transformation matrix:
-        *    - node->mTransformation contains the local transform
-        *    - Convert to your engine's matrix format if needed
-        * 
-        * 3. Look for GLTF node extensions:
-        *    - Custom node properties
-        *    - Lights (KHR_lights_punctual)
-        *    - Physics properties
-        * 
-        * 4. Store found extensions in the extensions map
-        * 
-
-        */
-        // Placeholder implementation - replace with actual implementation
-        LOG_WARN("Using placeholder GLTF node processing - implement proper GLTF node parsing!");
+        std::string nodeName = node->mName.C_Str();
+        
+        if (node->mMetaData) {
+            for (unsigned int i = 0; i < node->mMetaData->mNumProperties; i++) {
+                const aiString& key = node->mMetaData->mKeys[i];
+                const aiMetadataEntry& entry = node->mMetaData->mValues[i];
+                
+                std::string keyStr = key.C_Str();
+                std::string fullKey = nodeName + "." + keyStr;
+                
+                PropertyValue value;
+                switch (entry.mType) {
+                    case AI_BOOL:
+                        value = *static_cast<bool*>(entry.mData);
+                        break;
+                    case AI_INT32:
+                        value = *static_cast<int32_t*>(entry.mData);
+                        break;
+                    case AI_UINT64:
+                        value = static_cast<int>(*static_cast<uint64_t*>(entry.mData));
+                        break;
+                    case AI_FLOAT:
+                        value = *static_cast<float*>(entry.mData);
+                        break;
+                    case AI_DOUBLE:
+                        value = *static_cast<double*>(entry.mData);
+                        break;
+                    case AI_AISTRING:
+                        value = std::string(static_cast<aiString*>(entry.mData)->C_Str());
+                        break;
+                    case AI_AIVECTOR3D: {
+                        aiVector3D* vec = static_cast<aiVector3D*>(entry.mData);
+                        value = std::to_string(vec->x) + "," + 
+                                std::to_string(vec->y) + "," + 
+                                std::to_string(vec->z);
+                        break;
+                    }
+                    default:
+                        continue;
+                }
+                
+                extensions[fullKey] = value;
+            }
+        }
+        
+        aiMatrix4x4 transform = node->mTransformation;
+        if (!transform.IsIdentity()) {
+            std::string transformKey = nodeName + ".transform";
+            std::string transformValue;
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    if (i != 0 || j != 0) transformValue += ",";
+                    transformValue += std::to_string(transform[i][j]);
+                }
+            }
+            extensions[transformKey] = transformValue;
+        }
     }
 
     void ModelLoader::applyGLTFExtensions(
         std::shared_ptr<Model> model, 
-        const std::unordered_map<std::string, std::string>& extensions
+        const std::unordered_map<std::string, PropertyValue>& extensions
     ) {
-
-        LOG_DEBUG_F("TODO: Implement applyGLTFExtensions with %d extensions", static_cast<int>(extensions.size()));
+        if (extensions.empty()) {
+            return;
+        }
         
-        /*
-        * 
-        * 1. Iterate through all extensions
-        * 2. For each extension, determine what it affects:
-        *    - Material properties
-        *    - Rendering settings
-        *    - Animation data
-        *    - Custom behaviors
-        * 
-        * 3. Apply extensions to the model:
-        *    - Modify model properties
-        *    - Set up additional rendering parameters
-        *    - Configure animation systems
-        * 
-        * 4. Handle unknown extensions gracefully
-        * 
+        LOG_DEBUG_F("Applying %d GLTF extensions to model", static_cast<int>(extensions.size()));
         
-        */
-        
-        // Placeholder implementation - replace with actual implementation
-        if (!extensions.empty()) {
-            LOG_WARN("Using placeholder GLTF extension application - implement proper extension handling!");
+        for (const auto& [extensionName, extensionData] : extensions) {
+            if (extensionName.find("KHR_materials_unlit") != std::string::npos) {
+                LOG_INFO("Model uses unlit material");
+            } else if (extensionName.find("KHR_materials_pbrSpecularGlossiness") != std::string::npos) {
+                LOG_INFO("Model uses PBR specular-glossiness workflow");
+            } else if (extensionName.find("KHR_lights_punctual") != std::string::npos) {
+                LOG_INFO("Model contains punctual lights");
+            } else if (extensionName.find("KHR_draco_mesh_compression") != std::string::npos) {
+                LOG_INFO("Model uses Draco compression");
+            } else if (extensionName.find("transform") != std::string::npos) {
+                LOG_DEBUG_F("Transform data: %s", extensionName.c_str());
+            } else if (extensionName.find("LOD") != std::string::npos || 
+                       extensionName.find("lod") != std::string::npos) {
+                LOG_INFO_F("LOD information: %s", extensionName.c_str());
+            }
         }
     }
 

@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -13,6 +14,7 @@
 #include "modeling/Model.hpp"
 #include "modeling/Mesh.hpp"
 #include "modeling/Material.hpp"
+#include "modeling/ModelProperties.hpp"
 #include "shared/Shader.hpp"
 
 namespace modeling {
@@ -130,7 +132,7 @@ private:
      * - Store extension data in a format that can be used by the engine
      * - Consider using JSON parsing for complex extension data
      */
-    static std::unordered_map<std::string, std::string> loadGLTFExtensions(const aiScene* scene);
+    static std::unordered_map<std::string, PropertyValue> loadGLTFExtensions(const aiScene* scene);
     
     /**
      * @brief Process GLTF-specific node properties and extensions
@@ -147,7 +149,7 @@ private:
     static void processGLTFNode(
         aiNode* node, 
         const aiScene* scene, 
-        std::unordered_map<std::string, std::string>& extensions
+        std::unordered_map<std::string, PropertyValue>& extensions
     );
     
     /**
@@ -162,7 +164,7 @@ private:
      */
     static void applyGLTFExtensions(
         std::shared_ptr<Model> model, 
-        const std::unordered_map<std::string, std::string>& extensions
+        const std::unordered_map<std::string, PropertyValue>& extensions
     );
 
     // Utils

@@ -39,7 +39,9 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/src/animation)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/modeling)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/rendering)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/shared)
-
+add_subdirectory(external/osqp)
+add_library(odeint INTERFACE)
+target_include_directories(odeint INTERFACE external/odeint-v2/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE sharedLib animationLib modelingLib renderingLib)
 
 # Add test subdirectory. Everything for tests is loaded there

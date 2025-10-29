@@ -34,7 +34,6 @@ jobs:
       id: get_issue_item_id
       env:
         GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
-        GH_DEBUG: api
       run: |
 
         # get issue item id

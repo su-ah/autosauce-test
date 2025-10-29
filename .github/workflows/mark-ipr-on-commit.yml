@@ -8,8 +8,6 @@ on:
 jobs:
   mark_ipr:
     runs-on: ubuntu-latest
-    permissions:
-      projects: write
 
     steps:
     - name: Checkout repository

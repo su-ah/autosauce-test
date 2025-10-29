@@ -69,7 +69,7 @@ jobs:
           --head "$BRANCH_NAME" \
           --title "Implement #${ISSUE_NUMBER}" \
           --body "Resolves #${ISSUE_NUMBER}. This PR is auto-generated." \
-          --label "${{ env.SELECTED_TEAM }}" \
+          --label "$SELECTED_TEAM" \
           --draft)
         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
 

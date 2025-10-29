@@ -38,6 +38,7 @@ jobs:
           exit 1
         fi
 
+        echo "TEAM=$SELECTED_TEAM" >> $GITHUB_ENV
         echo "BASE_BRANCH=$SELECTED_TEAM-team-dev" >> $GITHUB_ENV
         echo "BRANCH_NAME=$SELECTED_TEAM-ticket-${{ github.event.issue.number }}" >> $GITHUB_ENV
 
@@ -69,7 +70,7 @@ jobs:
           --head "$BRANCH_NAME" \
           --title "Implement #${ISSUE_NUMBER}" \
           --body "Resolves #${ISSUE_NUMBER}. This PR is auto-generated." \
-          --label "$SELECTED_TEAM" \
+          --label "${{ env.TEAM }}" \
           --draft)
         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
 

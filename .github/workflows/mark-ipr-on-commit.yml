@@ -25,7 +25,8 @@ jobs:
       env:
         GH_TOKEN: $${{ secrets.GITHUB_TOKEN }}
       run: |
-        TITLE=$(gh pr view | head -n 1)
+        # TITLE=$(gh pr view | head -n 1)
+        TITLE=${{ github.event.pull_request.title }}
         [[ "$TITLE" =~ \#([0-9]+) ]]
         NUM=${BASH_REMATCH[1]}
         echo "ISSUE_NUM=$NUM" >> $GITHUB_ENV

@@ -1,9 +1,9 @@
 
-name: Mark issue as IPR on PR commit
+name: Mark issue as In Review on PR Ready
 
 on:
   pull_request:
-    types: [synchronize]
+    types: [ready_for_review]
 
 jobs:
   mark_ipr:
@@ -41,8 +41,8 @@ jobs:
                               '.items[] | select(.content.number == ${{ env.ISSUE_NUM }}) | .id')
         echo "ITEM_ID=$ID" >> $GITHUB_ENV
 
-    - name: move to ipr
-      id: move_to_ipr
+    - name: move to review
+      id: move_to_review
       env:
         GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
         GH_DEBUG: api
@@ -50,5 +50,5 @@ jobs:
         gh project item-edit \
           --project-id "PVT_kwHODSZWq84BGtsR" \
           --field-id "PVTSSF_lAHODSZWq84BGtsRzg3rfn0" \
-          --single-select-option-id "47fc9ee4" \
+          --single-select-option-id "80d3f9c0" \
           --id "${{ env.ITEM_ID }}"

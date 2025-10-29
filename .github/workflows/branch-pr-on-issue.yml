@@ -45,7 +45,7 @@ jobs:
         git fetch origin "$BASE_BRANCH"
         git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH"
         git push origin "$BRANCH_NAME"
-    
+
     - name: Create draft pr
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -62,7 +62,7 @@ jobs:
           --draft \
           --json url --jq '.url')
         echo "PR_URL=$PR_URL" >> $GITHUB_ENV
-    
+
     - name: Reference PR in issue
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -48,7 +48,7 @@ jobs:
 
     - name: Create draft pr
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         ISSUE_NUMBER=${{ github.event.issue.number }}
         BASE_BRANCH="${{ env.SELECTED_TEAM }}-team-dev"
@@ -65,7 +65,7 @@ jobs:
 
     - name: Reference PR in issue
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
         ISSUE_NUMBER=${{ github.event.issue.number }}
         PR_URL="${{ env.PR_URL }}"

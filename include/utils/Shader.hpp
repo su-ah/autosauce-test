@@ -6,13 +6,17 @@
 #include <vector>
 #include <functional>
 
+<<<<<<< HEAD:include/shared/Shader.hpp
 
 
 #include <Eigen/Core>
 
+=======
+#include <Eigen/Geometry>
+>>>>>>> main:include/utils/Shader.hpp
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
-#include "shared/Logger.hpp"
+#include "utils/Logger.hpp"
 
 enum SHADER_TYPE {
   UNINITIALIZED,
@@ -58,6 +62,10 @@ void setUniform(const std::string& name, int value);
 void setUniform(const std::string& name, bool value);
 void setUniform(const std::string& name, float x, float y, float z);
 void setUniform(const std::string& name, float x, float y, float z, float w);
+<<<<<<< HEAD:include/shared/Shader.hpp
+=======
+void setUniform(const std::string& name, const Eigen::Affine3d& mat);
+>>>>>>> main:include/utils/Shader.hpp
 
 void setUniform(const std::string& name, const Eigen::Matrix4f& mat4);
 

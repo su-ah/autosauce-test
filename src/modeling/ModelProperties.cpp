@@ -12,13 +12,10 @@ ModelProperties::~ModelProperties() {
     // Properties map will clean up automatically
 }
 
-/**
- * This function is meant to load these 
- * Model properties back into use
-*/
 void ModelProperties::load() {
 
 }
+
 
 /**
  * This function is meant to remove these 

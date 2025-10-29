@@ -2,7 +2,7 @@
 #include "shared/Logger.hpp"
 
 Scene::Scene() {
-    
+    Scene::instance = this;
 }
 
 Scene::Scene(std::string &filename) {
@@ -56,4 +56,18 @@ std::shared_ptr<Camera> Scene::get_camera() {
         set_camera(std::make_shared<Camera>(Vector3f(), Vector3f()));
     }
     return this->active_camera;
+}
+
+/**
+ * Getter for the light emitters in the scene
+*/
+std::vector<Object> Scene::getLights() {
+    return this->lights;
+}
+
+/**
+ * Adds a light to the list of emitters
+ */
+void Scene::addLight(const Object &light) {
+    this->lights.push_back(light);
 }

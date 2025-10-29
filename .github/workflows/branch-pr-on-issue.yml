@@ -38,8 +38,8 @@ jobs:
           exit 1
         fi
 
-        echo "BASE_BRANCH=${{ env.SELECTED_TEAM }}-team-dev" >> $GITHUB_ENV
-        echo "BRANCH_NAME=${{ env.SELECTED_TEAM }}-#${{ github.event.issue.number }}" >> $GITHUB_ENV
+        echo "BASE_BRANCH=$SELECTED_TEAM-team-dev" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$SELECTED_TEAM-#${{ github.event.issue.number }}" >> $GITHUB_ENV
 
     - name: Create branch
       run: |

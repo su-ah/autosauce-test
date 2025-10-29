@@ -39,15 +39,18 @@ jobs:
         fi
 
         echo "BASE_BRANCH=$SELECTED_TEAM-team-dev" >> $GITHUB_ENV
-        echo "BRANCH_NAME=$SELECTED_TEAM-#${{ github.event.issue.number }}" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$SELECTED_TEAM-ticket-${{ github.event.issue.number }}" >> $GITHUB_ENV
 
     - name: Create branch
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         BASE_BRANCH="${{ env.BASE_BRANCH }}"
         BRANCH_NAME="${{ env.BRANCH_NAME }}"
-        git fetch origin "$BASE_BRANCH"
-        git checkout -b "$BRANCH_NAME" "origin/$BASE_BRANCH"
-        git push origin "$BRANCH_NAME"
+        gh issue develop ${{ github.event.issue.number }} \
+          --base "$BASE_BRANCH" \
+          --checkout \
+          --name "$BRANCH_NAME"
 
     - name: create empty commit
       run: |

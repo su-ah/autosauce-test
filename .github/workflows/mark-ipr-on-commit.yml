@@ -40,6 +40,7 @@ jobs:
         ID=$(gh project item-list 1 --owner "su-ah" --format json | jq -r \
                               '.items[] | select(.content.number == ${{ env.ISSUE_NUM }}) | .id')
         echo "ITEM_ID=$ID" >> $GITHUB_ENV
+        echo $ID
 
     - name: move to ipr
       id: move_to_ipr

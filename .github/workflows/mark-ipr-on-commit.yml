@@ -12,69 +12,43 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-    
+      with:
+        ref: ${{ github.head_ref }}
+
     - name: Set up Git
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
-    
-    - name: Find referenced issue number
-      id: find_issue
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        ISSUE_NUMBER=$(gh pr view ${{ github.event.pull_request.number }} --json closingIssuesReferences --jq '.closingIssuesReferences[0].id')
 
-    # yo copilot going crazy rn
-    - name: Get project item and status
-      id: get_project_status
-      run: |
-        if [ -z "${ISSUE_NUMBER}" ]; then
-          echo "No referenced issue found."
-          exit 0
-        fi
-        # Get the issue node ID
-        ISSUE_NODE_ID=$(gh issue view $ISSUE_NUMBER --json id --jq '.id')
-        # Get project items for the issue
-        PROJECT_ITEM_ID=$(gh api graphql -f query='
-          query {
-            repository(owner: "${{ github.repository_owner }}", name: "${{ github.event.repository.name }}") {
-              issue(number: '"$ISSUE_NUMBER"') {
-                projectItems(first: 10) {
-                  nodes {
-                    id
-                    status: fieldValueByName(name: "Status") {
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          }' --jq '.data.repository.issue.projectItems.nodes[] | select(.status.name == "todo") | .id')
-        if [ -z "$PROJECT_ITEM_ID" ]; then
-          echo "No project item with status 'todo' found."
-          exit 0
-        fi
-        echo "PROJECT_ITEM_ID=$PROJECT_ITEM_ID" >> $GITHUB_ENV
-
-    - name: Set project status to "in progress"
-      if: env.PROJECT_ITEM_ID != ''
+    - name: get issue number
+      id: get_issue_num
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
       run: |
-        # Set the status field to "in progress"
-        gh api graphql -f query='
-          mutation {
-            updateProjectV2ItemFieldValue(
-              input: {
-                projectId: "${{ github.event.repository.id }}",
-                itemId: "${PROJECT_ITEM_ID}",
-                fieldId: "status",
-                value: { name: "in progress" }
-              }
-            ) {
-              projectV2Item {
-                id
-              }
-            }
-          }'
+        TITLE="${{ github.event.pull_request.title }}"
+        [[ $TITLE =~ \#([0-9]+) ]]
+        NUM=${BASH_REMATCH[1]}
+        echo "ISSUE_NUM=$NUM" >> $GITHUB_ENV
+
+    - name: get issue item id
+      id: get_issue_item_id
+      env:
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+      run: |
+
+        # get issue item id
+        ID=$(gh project item-list 1 --owner "su-ah" --format json | jq -r \
+                              '.items[] | select(.content.number == ${{ env.ISSUE_NUM }}) | .id')
+        echo "ITEM_ID=$ID" >> $GITHUB_ENV
+
+    - name: move to ipr
+      id: move_to_ipr
+      env:
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_DEBUG: api
+      run: |
+        gh project item-edit \
+          --project-id "PVT_kwHODSZWq84BGtsR" \
+          --field-id "PVTSSF_lAHODSZWq84BGtsRzg3rfn0" \
+          --single-select-option-id "47fc9ee4" \
+          --id "${{ env.ITEM_ID }}"

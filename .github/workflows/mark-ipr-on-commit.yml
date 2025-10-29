@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
 
     - name: Set up Git
       run: |
@@ -20,30 +22,33 @@ jobs:
 
     - name: get issue number
       id: get_issue_num
+      env:
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
       run: |
-        TITLE=$(gh pr view | head -n 1)
-        [[ "$TITLE" =~ \#([0-9]+) ]]
+        TITLE="${{ github.event.pull_request.title }}"
+        [[ $TITLE =~ \#([0-9]+) ]]
         NUM=${BASH_REMATCH[1]}
         echo "ISSUE_NUM=$NUM" >> $GITHUB_ENV
 
     - name: get issue item id
       id: get_issue_item_id
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
       run: |
 
         # get issue item id
-        ID=$(gh project item-list 5 --owner "P0k3rf4ce" --format json | jq -r \
+        ID=$(gh project item-list 1 --owner "su-ah" --format json | jq -r \
                               '.items[] | select(.content.number == ${{ env.ISSUE_NUM }}) | .id')
         echo "ITEM_ID=$ID" >> $GITHUB_ENV
 
     - name: move to ipr
       id: move_to_ipr
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_DEBUG: api
       run: |
         gh project item-edit \
-          --project-id "PVT_kwHOBKGPPs4BDYld" \
-          --field-id "PVTSSF_lAHOBKGPPs4BDYldzg1UalY" \
+          --project-id "PVT_kwHODSZWq84BGtsR" \
+          --field-id "PVTSSF_lAHODSZWq84BGtsRzg3rfn0" \
           --single-select-option-id "47fc9ee4" \
-          --id ${{ env.ITEM_ID }}
+          --id "${{ env.ITEM_ID }}"

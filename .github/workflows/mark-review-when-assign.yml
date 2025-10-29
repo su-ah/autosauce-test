@@ -3,10 +3,11 @@ name: Mark issue as In Review on PR Ready
 
 on:
   pull_request:
-    types: [ready_for_review]
+    types: [review_requested]
 
 jobs:
   mark_ipr:
+    if: contains("su-ah P0k3rf4ce NoahFreelove", ${{ github.event.pull_request.requested_reviewer.login }})
     runs-on: ubuntu-latest
 
     steps:
@@ -19,6 +20,13 @@ jobs:
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
+
+    - name: mark pr as ready
+      id: make_ready
+      env:
+        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+      run: |
+        gh pr ready
 
     - name: get issue number
       id: get_issue_num

@@ -23,7 +23,7 @@ jobs:
     - name: get issue number
       id: get_issue_num
       env:
-        GH_TOKEN: $${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # TITLE=$(gh pr view | head -n 1)
         TITLE=${{ github.event.pull_request.title }}

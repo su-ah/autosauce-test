@@ -45,6 +45,7 @@ jobs:
       id: move_to_ipr
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_DEBUG: api
       run: |
         gh project item-edit \
           --project-id "PVT_kwHODSZWq84BGtsR" \

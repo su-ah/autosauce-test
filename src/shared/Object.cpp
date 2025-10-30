@@ -1,5 +1,14 @@
 #include "shared/Object.hpp"
 
+
+Object::Object() 
+    : gltfFilename(""), animProps(nullptr), modelProps(nullptr), renderProps(nullptr) {
+}
+
+Object::Object(std::shared_ptr<animation::AnimationProperties> animProps, std::shared_ptr<modeling::ModelProperties> modelProps, std::shared_ptr<rendering::RenderProperties> renderProps)
+    : gltfFilename(""), animProps(animProps), modelProps(modelProps), renderProps(renderProps) {
+}
+
 Object::Object(std::string gltfFilename) {
     this->modelProps = std::shared_ptr<modeling::ModelProperties>(new modeling::ModelProperties(gltfFilename));
     this->animProps = std::shared_ptr<animation::AnimationProperties>(new animation::AnimationProperties(*(this->modelProps.get())));

@@ -331,6 +331,9 @@ void Shader::setUniform(const std::string& name, float x, float y, float z, floa
     }
 }
 
+
+
+
 /* Mat4f uniform */
 void Shader::setUniform(const std::string& name, const Eigen::Affine3d& mat) {
     GLint location = getUniformLocation(name);
@@ -340,6 +343,7 @@ void Shader::setUniform(const std::string& name, const Eigen::Affine3d& mat) {
         });
     }
 }
+
 
 /*
  * Actually use the shader

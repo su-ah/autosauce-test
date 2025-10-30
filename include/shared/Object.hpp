@@ -18,6 +18,8 @@ private:
     std::shared_ptr<modeling::ModelProperties> modelProps;
     std::shared_ptr<rendering::RenderProperties> renderProps;
 public:
+    Object();
+    Object(std::shared_ptr<animation::AnimationProperties> animProps, std::shared_ptr<modeling::ModelProperties> modelProps, std::shared_ptr<rendering::RenderProperties> renderProps);
     Object(std::string gltfFilename);
     ~Object();
 

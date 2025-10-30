@@ -24,9 +24,25 @@ jobs:
     - name: merge pr
       id: merge_pr
       env:
-        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr merge --squash ${{ github.event.pull_request.number }}
+
+    - name: close issue
+      id: close_issue
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+
+        # get issue num
+        TITLE="${{ github.event.pull_request.title }}"
+        [[ $TITLE =~ \#([0-9]+) ]]
+        NUM=${BASH_REMATCH[1]}
+
+        # close issue
+        gh issue close $NUM \
+        --reason 'completed' \
+        --comment "Implemented by ${{ github.event.pull_request.number }}."
 
 
   set_ipr:
@@ -47,14 +63,14 @@ jobs:
     - name: mark pr as draft
       id: make_draft
       env:
-        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr ready --undo ${{ github.event.pull_request.number }}
 
     - name: get issue number
       id: get_issue_num
       env:
-        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         TITLE="${{ github.event.pull_request.title }}"
         [[ $TITLE =~ \#([0-9]+) ]]

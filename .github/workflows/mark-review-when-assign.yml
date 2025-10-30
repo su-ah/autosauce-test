@@ -24,14 +24,14 @@ jobs:
     - name: mark pr as ready
       id: make_ready
       env:
-        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr ready
 
     - name: get issue number
       id: get_issue_num
       env:
-        GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         TITLE="${{ github.event.pull_request.title }}"
         [[ $TITLE =~ \#([0-9]+) ]]

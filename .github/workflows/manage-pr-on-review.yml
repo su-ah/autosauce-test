@@ -49,7 +49,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
       run: |
-        gh pr ready --undo
+        gh pr ready --undo ${{ github.event.pull_request.number }}
 
     - name: get issue number
       id: get_issue_num

@@ -26,7 +26,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.EMMY_TOKEN }}
       run: |
-        gh pr merge ${{ github.event.pull_request_review.pull_request.number }}
+        gh pr merge -s ${{ github.event.review.pull_request.number }}
 
 
   set_ipr:

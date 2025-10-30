@@ -42,7 +42,7 @@ jobs:
         # close issue
         gh issue close $NUM \
         --reason 'completed' \
-        --comment "Implemented by ${{ github.event.pull_request.number }}."
+        --comment "Implemented by PR \#${{ github.event.pull_request.number }}"
 
 
   set_ipr:
